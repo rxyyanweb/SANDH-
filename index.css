@@ -1,0 +1,294 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+@layer base {
+  :root {
+    --font-sans: 'Plus Jakarta Sans', sans-serif;
+    --font-serif: 'Playfair Display', Georgia, serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    min-height: 100dvh;
+    touch-action: pan-y;
+  }
+}
+
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+.font-sans {
+  font-family: var(--font-sans);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Fixed non-scrolling luxury restaurant background (GPU promoted layer for zero scroll lag) */
+.fixed-restaurant-bg {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  background-color: #08090c;
+  background-image: 
+    radial-gradient(circle at 15% 15%, rgba(212, 175, 55, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 85% 35%, rgba(245, 158, 11, 0.06) 0%, transparent 45%),
+    radial-gradient(circle at 50% 80%, rgba(180, 83, 9, 0.05) 0%, transparent 50%),
+    url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23d4af37' fill-opacity='0.035' fill-rule='evenodd'%3E%3Cpath d='M0 0h40v40H0V0zm40 40h40v40H40V40zm0-40l20 20-20 20-20-20 20-20zm0 40l20 20-20 20-20-20 20-20zM20 20l20 20-20 20L0 40l20-20zm40 0l20 20-20 20-20-20 20-20zM0 20l20-20 20 20-20 20L0 20zm40 0l20-20 20 20-20 20L40 20zM20 60l20-20 20 20-20 20L20 60zm40 0l20-20 20 20-20 20L60 60z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.light .fixed-restaurant-bg {
+  background-color: #f8f6f0;
+  background-image: 
+    radial-gradient(circle at 15% 15%, rgba(212, 175, 55, 0.06) 0%, transparent 40%),
+    radial-gradient(circle at 85% 35%, rgba(245, 158, 11, 0.05) 0%, transparent 45%),
+    url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23b38f24' fill-opacity='0.04' fill-rule='evenodd'%3E%3Cpath d='M0 0h40v40H0V0zm40 40h40v40H40V40zm0-40l20 20-20 20-20-20 20-20zm0 40l20 20-20 20-20-20 20-20zM20 20l20 20-20 20L0 40l20-20zm40 0l20 20-20 20-20-20 20-20zM0 20l20-20 20 20-20 20L0 20zm40 0l20-20 20 20-20 20L40 20zM20 60l20-20 20 20-20 20L20 60zm40 0l20-20 20 20-20 20L60 60z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Prevent double scrollbars & contain modal overscroll */
+.overscroll-contain {
+  overscroll-behavior: contain;
+}
+
+/* Custom smooth scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.35);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.65);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(75, 85, 99, 0.45);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.75);
+}
+
+@keyframes progress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+/* Modal center pop-up opening animation */
+@keyframes modalPop {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0) scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.animate-modal-pop {
+  animation: modalPop 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Side slide-in animation for Cart Drawer */
+@keyframes drawerSlideRight {
+  0% {
+    transform: translate3d(100%, 0, 0);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+.animate-drawer-slide {
+  animation: drawerSlideRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Cart Icon bouncing feedback on Add-to-Cart */
+@keyframes cartBounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.3) rotate(-8deg);
+  }
+  60% {
+    transform: scale(1.15) rotate(6deg);
+  }
+  80% {
+    transform: scale(1.05);
+  }
+}
+
+.animate-cart-bounce {
+  animation: cartBounce 0.65s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* ============================================================================
+   1. MENU CLICK & CATEGORY SWITCH: ULTRA-SMOOTH 60FPS CASCADE ANIMATION
+   ============================================================================ */
+@keyframes menuDishCascade {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.animate-dish-cascade {
+  animation: menuDishCascade 0.44s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes menuHeaderGlowSweep {
+  0% {
+    transform: translate3d(0, 8px, 0);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+.animate-menu-spotlight {
+  animation: menuHeaderGlowSweep 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Smooth Dish Card Hover Physics (Zero GPU filter lag) */
+.dish-card-smooth {
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.25s ease,
+    box-shadow 0.28s ease;
+}
+
+.dish-card-smooth:hover {
+  transform: translate3d(0, -4px, 0);
+}
+
+/* ============================================================================
+   2. MENU -> HOME RETURN ANIMATION (When clicking Home from Menu/anywhere)
+   ============================================================================ */
+@keyframes heroReturnGlide {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -24px, 0) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.animate-hero-return {
+  animation: heroReturnGlide 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ============================================================================
+   3. BOOK BUTTON CLICK: DISTINCT SMOOTH UNFOLD & RISE ANIMATION
+   ============================================================================ */
+@keyframes bookingRoyalUnfold {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 32px, 0) scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.animate-booking-unfold {
+  animation: bookingRoyalUnfold 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes bookingCardStagger {
+  0% {
+    opacity: 0;
+    transform: translate3d(-14px, 0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-booking-stagger {
+  animation: bookingCardStagger 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes bookSectionLeftGlide {
+  0% {
+    opacity: 0;
+    transform: translate3d(-24px, 0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes bookSectionFormRise {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 26px, 0) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.animate-book-left-glide {
+  animation: bookSectionLeftGlide 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-book-form-rise {
+  animation: bookSectionFormRise 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ============================================================================
+   4. GLOBAL SMOOTH SECTION SCROLL-REVEAL
+   ============================================================================ */
+.section-smooth-reveal {
+  opacity: 0;
+  transform: translate3d(0, 20px, 0);
+  transition:
+    opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.section-smooth-reveal.is-revealed {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Sandh Restaurant | Karachi",
+  "description": "Sandh Restaurant in Block 2 Gulshan-e-Iqbal, Karachi, Pakistan offering authentic dining, online ordering for delivery and pickup, and table reservations.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
