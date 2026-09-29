@@ -50,7 +50,7 @@ export const AboutSection: React.FC = () => {
               </div>
               <h4 className="text-sm font-bold text-gray-900 dark:text-[#fbf7ee]">Doorstep Delivery</h4>
               <p className="text-xs text-gray-600 dark:text-[#8e98aa] leading-relaxed">
-                Coverage across GGulshan-e-Iqbal, Johar, and surrounding Karachi sectors!.
+                Coverage across Gulshan-e-Iqbal, Johar, and surrounding Karachi sectors!.
               </p>
             </div>
           </div>
